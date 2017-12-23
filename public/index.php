@@ -9,8 +9,8 @@
 use Av\Core\Kernel;
 use Av\Core\Request;
 
-require_once '../core/autoload.php';
-require_once '../core/common.php';
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../core/common.php';
 
 $request = Request::getInstance();
 $kernel = new Kernel();
