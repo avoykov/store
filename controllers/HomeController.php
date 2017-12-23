@@ -3,7 +3,8 @@
 namespace Av\Controllers;
 
 use Av\Core\Controller;
-use Av\Core\Request;
+use Av\Core\Requests\Request;
+use Av\Models\Product;
 
 /**
  * Class Controller
@@ -19,7 +20,7 @@ class HomeController extends Controller
      */
     public function home(Request $request)
     {
-        DB()->prepare("INSERT INTO products (name) VALUES ('test')")->execute();
+        $product = Product::create(['name' => 'test2']);
         return View('home');
     }
 }

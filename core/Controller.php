@@ -2,6 +2,8 @@
 
 namespace Av\Core;
 
+use Av\Core\Requests\Request;
+
 /**
  * Class Controller
  * @package Av\Controllers
@@ -9,7 +11,7 @@ namespace Av\Core;
 class Controller
 {
     /**
-     * Handles home pages
+     * Handler for page 404.
      *
      * @param Request $request
      * @return string
@@ -20,7 +22,18 @@ class Controller
     }
 
     /**
-     * Handles home pages
+     * Handler for errorPage.
+     *
+     * @param Request $request
+     * @return string
+     */
+    public function pageError(Request $request)
+    {
+        return View('pageError');
+    }
+
+    /**
+     * Handler for page 403
      *
      * @param Request $request
      * @return string

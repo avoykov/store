@@ -2,6 +2,9 @@
 
 namespace Av\Core;
 
+use Av\Core\Requests\Request;
+use Av\Core\Services\RouteService;
+
 /**
  * Class Kernel core of application.
  * @package Av\Store
@@ -25,13 +28,13 @@ class Kernel
     /**
      * Contains current request.
      *
-     * @var \Av\Core\Request
+     * @var Request
      */
     public $request;
     /**
      * Route service.
      *
-     * @var \Av\Core\Route
+     * @var \Av\Core\RouteService
      */
     public $routeService;
 
@@ -40,7 +43,7 @@ class Kernel
      */
     public function __construct()
     {
-        $this->routeService = new Route();
+        $this->routeService = new RouteService();
     }
 
     /**
@@ -60,7 +63,7 @@ class Kernel
     }
 
     /**
-     * @return \Av\Core\Request
+     * @return Request
      */
     public function getRequest()
     {
@@ -70,7 +73,7 @@ class Kernel
     /**
      * Main handler for getting response.
      *
-     * @param \Av\Core\Request $request
+     * @param Request $request
      * @return string
      */
     public function handle($request)

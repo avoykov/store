@@ -1,6 +1,8 @@
 <?php
 
-namespace Av\Core;
+namespace Av\Core\Views;
+
+use Av\Core\Kernel;
 
 /**
  * Class View

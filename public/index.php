@@ -7,7 +7,7 @@
  */
 
 use Av\Core\Kernel;
-use Av\Core\Request;
+use Av\Core\Requests\Request;
 
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../core/common.php';

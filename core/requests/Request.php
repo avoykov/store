@@ -1,6 +1,6 @@
 <?php
 
-namespace Av\Core;
+namespace Av\Core\Requests;
 
 /**
  * Class Request which contains all info about request.

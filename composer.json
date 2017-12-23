@@ -3,7 +3,14 @@
     "psr-4": {
       "Av\\Controllers\\": "controllers/",
       "Av\\Models\\": "models/",
-      "Av\\Core\\": "core/"
+      "Av\\Core\\": "core/",
+      "Av\\Core\\Database\\": "core/database",
+      "Av\\Core\\Models\\": "core/models",
+      "Av\\Core\\Requests\\": "core/requests",
+      "Av\\Core\\Responses\\": "core/responses",
+      "Av\\Core\\Services\\": "core/services",
+      "Av\\Core\\Views\\": "core/views",
+      "Av\\Core\\Exceptions\\": "core/exceptions"
     }
   }
 }

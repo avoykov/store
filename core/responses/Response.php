@@ -1,6 +1,6 @@
 <?php
 
-namespace Av\Core;
+namespace Av\Core\Responses;
 
 /**
  * Class Response

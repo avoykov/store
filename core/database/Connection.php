@@ -1,6 +1,6 @@
 <?php
 
-namespace Av\Core;
+namespace Av\Core\Database;
 
 use PDO;
 
@@ -13,7 +13,7 @@ class Connection
     /**
      * Instance of connection
      *
-     * @var \Av\Core\Connection
+     * @var \Av\Core\Database\Connection
      */
     private static $instance;
     /**
@@ -36,7 +36,7 @@ class Connection
     /**
      * Returns instance of connection.
      *
-     * @return Connection
+     * @return \Av\Core\Database\Connection
      */
     public static function getInstance()
     {

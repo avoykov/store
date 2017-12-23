@@ -1,12 +1,15 @@
 <?php
 
-namespace Av\Core;
+namespace Av\Core\Services;
+
+use Av\core\exceptions\RouteException;
+use Exception;
 
 /**
  * Class Route
  * @package Av\Core
  */
-class Route
+class RouteService
 {
 
     /**
@@ -39,6 +42,13 @@ class Route
      * @var string
      */
     protected $page403 = '\Av\Core\Controller::page403';
+
+    /**
+     * Handler for page 403.
+     *
+     * @var string
+     */
+    protected $pageError = '\Av\Core\Controller::pageError';
 
     /**
      * Route constructor.
@@ -79,7 +89,7 @@ class Route
      *
      * @param $request
      * @return string
-     * @throws \Exception
+     * @throws Exception
      */
     public function handle($request)
     {
@@ -88,13 +98,16 @@ class Route
         try {
             list($handler, $method) = $this->searchRoute();
             return $this->applyHandler($handler, $method);
-        } catch (\Exception $e) {
+        } catch (RouteException $ex) {
             return $this->applyHandler($this->page404);
+        } catch (Exception $ex) {
+            return $this->applyHandler($this->pageError);
         }
+
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     protected function searchRoute()
     {
@@ -107,7 +120,7 @@ class Route
                 $method,
             ];
         } else {
-            throw new \Exception('Not existing route.', 404);
+            throw new Exception('Not existing route.', 404);
         }
     }
 
@@ -117,7 +130,7 @@ class Route
      * @param $handler
      * @param string $method
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     protected function applyHandler($handler, $method = 'get')
     {
@@ -129,17 +142,16 @@ class Route
                     if (method_exists($controller, $method)) {
                         return $controller->$method($this->request);
                     } else {
-                        throw new \Exception('Not existing controller method.', 404);
+                        throw new RouteException('Not existing controller method.', 404);
                     }
-
                 } else {
-                    throw new \Exception('Not existing controller', 404);
+                    throw new RouteException('Not existing controller', 404);
                 }
             } else {
-                throw new \Exception('Wrong method for defined route.', 404);
+                throw new RouteException('Wrong method for defined route.', 404);
             }
         } else {
-            throw new \Exception('Empty handler in routes.', 404);
+            throw new RouteException('Empty handler in routes.', 404);
         }
     }
 
