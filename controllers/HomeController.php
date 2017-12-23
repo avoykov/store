@@ -19,6 +19,7 @@ class HomeController extends Controller
      */
     public function home(Request $request)
     {
-        return view('home');
+        DB()->prepare("INSERT INTO products (name) VALUES ('test')")->execute();
+        return View('home');
     }
 }

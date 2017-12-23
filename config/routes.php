@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains base mapping between
+ * Contains base mapping between routes and handlers.
  */
 
 return [

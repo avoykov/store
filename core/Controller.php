@@ -16,7 +16,7 @@ class Controller
      */
     public function page404(Request $request)
     {
-        return view('page404');
+        return View('page404');
     }
 
     /**
