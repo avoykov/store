@@ -1,6 +1,9 @@
 #Description
 Basic MVC framework + basic store implementation conform test requirements.
 
+##Version - 1.0-alpha. 
+
+
 #Installation
 0) Standard actions related to any web project;
 1) Run composer install
