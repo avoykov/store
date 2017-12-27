@@ -23,7 +23,7 @@ class OrderController
     public function index(Request $request, $hash)
     {
         try {
-            $order = Order::load($hash, 'id');
+            $order = Order::load($hash, 'hash');
         } catch (\Exception $ex) {
             return response()->back(['errors' => ['Cant load such request']]);
         }
