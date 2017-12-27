@@ -1,10 +1,10 @@
-#Description
+# Description:
 Basic MVC framework + basic store implementation conform test requirements.
 
-##Version - 1.0-alpha. 
+## Version - 1.0-alpha. 
 
 
-#Installation
+# Installation
 0) Standard actions related to any web project;
 1) Run composer install
 21) Enter all needed data to - config/* (mostly database file);
@@ -12,10 +12,10 @@ Basic MVC framework + basic store implementation conform test requirements.
 4) Run php run.php
 5) Profit
 
-#Framework
-#####Was developed basic MVC framework.
+# Framework
+##### Was developed basic MVC framework.
 
-#####List of implemented features:
+##### List of implemented features:
 1) Base routing (including params in routes and support of controllers);
 2) PDO decorator;
 3) Base model and api for working with models;
