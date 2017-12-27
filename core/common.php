@@ -1,52 +1,58 @@
 <?php
 
-use Av\Core\Database\Connection;
-use Av\Core\Database\PdoDecorator;
-use Av\Core\Views\View;
+use Av\Core\Kernel;
+use Av\Core\Responses\Response;
 
 /**
- * Helper for creating view object
+ * Helper for creating response.
  *
- * @param $name
- * @param array $params
  * @return mixed
  */
-function View($name, $params = [])
+function response()
 {
-    return new View($name, $params);
+    return new Response();
 }
 
 /**
- * Helper for working with DB.
+ * Helper for getting session.
+ *
+ * @return \Av\Core\Session\Session
  */
-function DB()
+function session()
 {
-    try {
-        return new PdoDecorator(Connection::getInstance()->connect());
-    } catch (\Exception $ex) {
-        return false;
-    }
+    return Kernel::getRequest()->session;
 }
 
-$config = require_once '../config/main.php';
-if (empty($config['debug'])) {
-    /**
-     * Handler for errors
-     *
-     * @param null $number
-     * @param null $message
-     * @return string
-     *
-     * @todo will be nice to add some logs and move it separate class.
-     */
-    function storeErrorHandler($number = null, $message = null)
-    {
-        $view = new View('pageError');
-        return $view->render();
+/**
+ * Helper for csrf token generation.
+ *
+ * @return string
+ */
+function csrf_token()
+{
+    if (session()->has('csrf_token') && ((time() - session()->get('csrf_token_created')) < 3600)) {
+        return session()->get('csrf_token');
+    } else {
+        $token = hash_hmac('sha256', uniqid(rand() . session()->getId(), true), Kernel::$key);
+        session()->set('csrf_token', $token);
+        session()->set('csrf_token_created', time());
+        return $token;
     }
 
-    set_error_handler('storeErrorHandler');
-    register_shutdown_function('storeErrorHandler');
+}
 
-    error_reporting(0);
+/**
+ *  Helper for generating full url.
+ *
+ * @param string $path
+ * @return string
+ */
+function full_url($path = '/')
+{
+    $request = Kernel::getRequest();
+    $domain = "{$request->scheme}://{$request->domain}";
+    if ($path[0] != '/') {
+        $domain .= '/';
+    }
+    return $domain . $path;
 }

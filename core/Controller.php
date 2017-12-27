@@ -18,7 +18,7 @@ class Controller
      */
     public function page404(Request $request)
     {
-        return View('page404');
+        return response()->view('page404');
     }
 
     /**
@@ -29,7 +29,7 @@ class Controller
      */
     public function pageError(Request $request)
     {
-        return View('pageError');
+        return response()->view('pageError');
     }
 
     /**
@@ -40,6 +40,6 @@ class Controller
      */
     public function page403(Request $request)
     {
-        return '403';
+        return response()->view('page404');
     }
 }

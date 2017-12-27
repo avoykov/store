@@ -2,7 +2,9 @@
 
 namespace Av\Core\Services;
 
-use Av\core\exceptions\RouteException;
+use Av\Core\Exceptions\RouteException;
+use Av\Core\Requests\Request;
+use Av\Core\Responses\Response;
 use Exception;
 
 /**
@@ -15,7 +17,7 @@ class RouteService
     /**
      * Contains current request.
      *
-     * @var \Av\Core\Request
+     * @var Request
      */
     public $request;
     /**
@@ -30,6 +32,18 @@ class RouteService
      * @var array
      */
     protected $routes = [];
+    /**
+     * Pattern for checking routes.
+     *
+     * @var string
+     */
+    protected $pattern;
+    /**
+     * Contains route data.
+     *
+     * @var array
+     */
+    protected $routeData = [];
     /**
      * Handler for page 404.
      *
@@ -55,7 +69,13 @@ class RouteService
      */
     public function __construct()
     {
-        $this->routes = require_once('../config/routes.php');
+        $routes = require_once('../config/routes.php');
+        $i = 0;
+        foreach ($routes as $route => $value) {
+            $name = 'route' . $i++;
+            $this->routes[$name] = $value;
+            $this->routes[$name]['route'] = $route;
+        }
     }
 
     /**
@@ -69,7 +89,7 @@ class RouteService
     }
 
     /**
-     * @return \Av\Core\Request
+     * @return Request
      */
     public function getRequest()
     {
@@ -87,23 +107,27 @@ class RouteService
     /**
      * Handle a request.
      *
-     * @param $request
+     * @param Request $request
      * @return string
      * @throws Exception
      */
     public function handle($request)
     {
         $this->request = $request;
-        $this->path = $request->server['REQUEST_URI'];
-        try {
-            list($handler, $method) = $this->searchRoute();
-            return $this->applyHandler($handler, $method);
-        } catch (RouteException $ex) {
-            return $this->applyHandler($this->page404);
-        } catch (Exception $ex) {
-            return $this->applyHandler($this->pageError);
+        if (!$request->validateCsrf()) {
+            $response = new Response('Potential CSRF attack', 404);
+            return $response;
         }
-
+        $this->path = $request->path == '/' ? '/home' : $request->path;
+        $this->path = filter_var($this->path, FILTER_SANITIZE_SPECIAL_CHARS);
+        try {
+            list($handler, $method, $params) = $this->searchRoute();
+            return $this->applyHandler($handler, $method, $params);
+        } catch (RouteException $ex) {
+            return response()->view('page404');
+        } catch (Exception $ex) {
+            return response()->view('pageError');
+        }
     }
 
     /**
@@ -111,17 +135,53 @@ class RouteService
      */
     protected function searchRoute()
     {
-        if (isset($this->routes[$this->path])) {
-            $route = $this->routes[$this->path];
-            $handler = !empty($route['handler']) ? $route['handler'] : null;
-            $method = !empty($route['handler']['method']) ? $route['handler']['method'] : 'GET';
-            return [
-                $handler,
-                $method,
-            ];
-        } else {
-            throw new Exception('Not existing route.', 404);
+        $this->preparePattern();
+        if (preg_match($this->pattern, $this->path, $matches)) {
+            array_shift($matches);
+            $matches = array_filter($matches);
+            $routeName = key($matches);
+            $params = array_slice($matches, 2);
+
+            if (isset($this->routeData[$routeName])) {
+                $route = $this->routeData[$routeName];
+                $handler = !empty($route['handler']) ? $route['handler'] : null;
+                $method = !empty($route['method']) ? $route['method'] : 'GET';
+                array_unshift($route['params'], 'request');
+                array_unshift($params, $this->request);
+                $params = !empty($params) ? array_combine($route['params'], $params) : [];
+                return [
+                    $handler,
+                    $method,
+                    $params
+                ];
+            } else {
+                throw new Exception('Not existing route.', 404);
+            }
         }
+    }
+
+    /**
+     * Prepare patterns based on config.
+     */
+    protected function preparePattern()
+    {
+        $patterns = [];
+        foreach ($this->routes as $route => $config) {
+            $this->routeData[$route] = $config;
+            $prepared = preg_replace('/\{([^:]+):([^}]+)\}/', '{$1}', $config['route']);
+
+            $params = [];
+            if (preg_match('/\{([^}]+)\}/', $prepared, $params)) {
+                array_shift($params);
+            }
+
+            $this->routeData[$route]['params'] = $params;
+            $pattern = preg_replace('/\{([^:]+):([^}]+)\}/', '($2)', $config['route']);
+            $patterns[] = "(?P<{$route}>{$pattern})";
+        }
+
+        $pattern = implode(' | ', $patterns);
+        $this->pattern = "~^(?: {$pattern} )$~x";
     }
 
     /**
@@ -132,7 +192,7 @@ class RouteService
      * @return mixed
      * @throws Exception
      */
-    protected function applyHandler($handler, $method = 'get')
+    protected function applyHandler($handler, $method = 'get', $params = [])
     {
         if (!empty($handler)) {
             if (strtolower($method) == strtolower($this->request->method)) {
@@ -140,7 +200,7 @@ class RouteService
                 if (class_exists($class)) {
                     $controller = new $class();
                     if (method_exists($controller, $method)) {
-                        return $controller->$method($this->request);
+                        return call_user_func_array([$controller, $method], $params);
                     } else {
                         throw new RouteException('Not existing controller method.', 404);
                     }

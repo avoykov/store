@@ -4,13 +4,14 @@
       "Av\\Controllers\\": "controllers/",
       "Av\\Models\\": "models/",
       "Av\\Core\\": "core/",
-      "Av\\Core\\Database\\": "core/database",
-      "Av\\Core\\Models\\": "core/models",
-      "Av\\Core\\Requests\\": "core/requests",
-      "Av\\Core\\Responses\\": "core/responses",
-      "Av\\Core\\Services\\": "core/services",
-      "Av\\Core\\Views\\": "core/views",
-      "Av\\Core\\Exceptions\\": "core/exceptions"
+      "Av\\Core\\Database\\": "core/database/",
+      "Av\\Core\\Models\\": "core/models/",
+      "Av\\Core\\Requests\\": "core/requests/",
+      "Av\\Core\\Responses\\": "core/responses/",
+      "Av\\Core\\Services\\": "core/services/",
+      "Av\\Core\\Views\\": "core/views/",
+      "Av\\Core\\Exceptions\\": "core/exceptions/",
+      "Av\\Core\\Session\\": "core/session/"
     }
   }
 }

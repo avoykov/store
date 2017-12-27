@@ -12,13 +12,23 @@ use Av\Core\Services\RouteService;
 class Kernel
 {
     /**
+     * Contains current request.
+     *
+     * @var Request
+     */
+    public static $request;
+    /**
+     * Contains api key.
+     *
+     * @var string
+     */
+    public static $key;
+    /**
      * Root directory of application.
      *
      * @var string
      */
     protected static $rootDirectory;
-
-
     /**
      * Current path
      *
@@ -26,15 +36,9 @@ class Kernel
      */
     protected static $currentPath;
     /**
-     * Contains current request.
-     *
-     * @var Request
-     */
-    public $request;
-    /**
      * Route service.
      *
-     * @var \Av\Core\RouteService
+     * @var \Av\Core\Services\RouteService
      */
     public $routeService;
 
@@ -44,6 +48,8 @@ class Kernel
     public function __construct()
     {
         $this->routeService = new RouteService();
+        $main = require '../config/main.php';
+        self::$key = $main['key'];
     }
 
     /**
@@ -65,10 +71,19 @@ class Kernel
     /**
      * @return Request
      */
-    public function getRequest()
+    public static function getRequest()
     {
-        return $this->request;
+        return self::$request;
     }
+
+    /**
+     * @param Request $request
+     */
+    public static function setRequest($request)
+    {
+        self::$request = $request;
+    }
+
 
     /**
      * Main handler for getting response.
@@ -78,14 +93,15 @@ class Kernel
      */
     public function handle($request)
     {
-        $this->request = $request;
+        self::$request = $request;
         self::$rootDirectory = $request->server['DOCUMENT_ROOT'];
         $this->setDocRoot();
 
         try {
+            self::$request->session->start();
             return $this->routeService->handle($request);
         } catch (\Exception $ex) {
-            return $ex->getMessage();
+            return response()->view('page404');
         }
     }
 

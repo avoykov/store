@@ -20,7 +20,9 @@ class HomeController extends Controller
      */
     public function home(Request $request)
     {
-        $product = Product::create(['name' => 'test2']);
-        return View('home');
+        $products = Product::all(3);
+        return response()->view('home', ['products' => $products]);
     }
+
+
 }

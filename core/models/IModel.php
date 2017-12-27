@@ -20,9 +20,10 @@ interface IModel
      * Returns object from database.
      *
      * @param $id
+     * @param $column
      * @return IModel
      */
-    static function load($id);
+    static function load($id, $column = 'id');
 
     /**
      * Save data to database.

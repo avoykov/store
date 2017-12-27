@@ -2,6 +2,9 @@
 
 namespace Av\Core\Models;
 
+use Av\Core\Database\DB;
+use Exception;
+
 /**
  * Class Model
  * @package Av\Core\Models
@@ -13,7 +16,7 @@ class Model implements IModel
      *
      * @var string
      */
-    private static $tableName;
+    protected static $tableName;
 
     /**
      * Id of model.
@@ -21,6 +24,13 @@ class Model implements IModel
      * @var string
      */
     protected $id;
+
+    /**
+     * Field which should be ignored.
+     *
+     * @var array
+     */
+    protected static $ignore = [];
 
     /**
      * @inheritdoc
@@ -52,24 +62,33 @@ class Model implements IModel
      */
     public function save()
     {
-        $attrs = get_object_vars($this);
+        $tableName = static::$tableName;
+
+        $attrs = [];
+        foreach (get_object_vars($this) as $name => $value) {
+            if (!is_null($value) && !in_array($name, static::$ignore)) {
+                $attrs[$name] = $value;
+            }
+        }
+
         if (isset($this->id)) {
             $this->update($attrs);
         }
 
-        $tableName = static::$tableName;
-        $params = $values = [];
-        $attrs = array_filter($attrs);
+        $params = array_values($attrs);
+
+        $placeholders = array_fill(0, count($attrs), '?');
+        $placeholders = implode(',', $placeholders);
+
         $keys = array_keys($attrs);
-        foreach ($attrs as $name => $value) {
-            $placeholder = ":{$name}";
-            $params[$placeholder] = $value;
-            $values[] = $placeholder;
-        }
-        $values = implode(',', $values);
         $keys = implode(',', $keys);
-        $query = "INSERT INTO {$tableName} ({$keys}) VALUES({$values})";
-        $result = DB()->query($query, $params);
+
+
+        $query = "INSERT INTO {$tableName} ({$keys}) VALUES({$placeholders})";
+        $result = DB::run($query, $params);
+        if (empty($this->getId())) {
+            $this->setId($result);
+        }
         return $result ? $this : $result;
 
     }
@@ -93,7 +112,7 @@ class Model implements IModel
             $params[':id'] = $this->id;
             $values = implode(',', $values);
             $query = "UPDATE {$tableName} SET {$values} WHERE id = :id";
-            $result = DB()->query($query, $params);
+            $result = DB::run($query, $params);
             return $result ? $this : $result;
         } else {
             return false;
@@ -101,14 +120,52 @@ class Model implements IModel
     }
 
     /**
+     * @return string
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param string $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
      * @inheritdoc
      */
-    public static function load($id)
+    public static function load($id, $column = 'id')
     {
         $tableName = static::$tableName;
-        $query = "SELECT * FROM {$tableName} WHERE id = {$id}";
         $model = get_called_class();
-        return DB()->get($query, $model);
+        if (is_array($id)) {
+            $id = implode(', ', $id);
+            $query = "SELECT * FROM {$tableName} WHERE {$column} IN ({$id})";
+            $result = DB::getMultiple($query, [], $model);
+        } else {
+            $query = "SELECT * FROM {$tableName} WHERE {$column} = {$id}";
+
+            $result = DB::get($query, $model);
+            if (empty($result)) {
+                throw new Exception('Not existing instance.');
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function exists($id)
+    {
+        $tableName = static::$tableName;
+        $query = "SELECT 1 FROM {$tableName} WHERE id = {$id}";
+        $result = DB::fetch($query);
+        return !empty($result);
     }
 
     /**
@@ -117,13 +174,13 @@ class Model implements IModel
     public static function all($limit = null)
     {
         $tableName = static::$tableName;
-        $query = "SELECT * FROM {$tableName}";
+        $query = "SELECT * FROM {$tableName} ORDER BY RANDOM()";
         if (!empty($limit)) {
             $query .= " LIMIT {$limit}";
         }
         $model = get_called_class();
 
-        return DB()->all($query, $model);
+        return DB::all($query, $model);
     }
 
     /**
@@ -134,7 +191,7 @@ class Model implements IModel
         if (!empty($this->id)) {
             $tableName = static::$tableName;
             $query = "SELECT * FROM {$tableName} WHERE id = {$this->id}";
-            DB()->query($query);
+            DB::query($query);
             return $this->id;
         } else {
             return false;

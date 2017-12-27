@@ -56,7 +56,7 @@ class View
      */
     protected function preparePath()
     {
-        $path = str_replace('.', '\\', $this->name);
+        $path = str_replace('.', '/', $this->name);
         $this->path = "{$this->docRoot}views/{$path}.php";
     }
 
