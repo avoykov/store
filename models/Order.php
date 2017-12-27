@@ -5,6 +5,7 @@ namespace Av\Models;
 
 use Av\Core\Database\DB;
 use Av\Core\Kernel;
+use Av\core\models\Mail;
 use Av\Core\Models\Model;
 
 /**
@@ -44,7 +45,6 @@ class Order extends Model
         $data['hash'] = self::generateHash();
         $order = parent::create($data);
 
-        $products = [];
         if (!empty($data['products'])) {
             $order->products = $data['products'];
 
@@ -58,6 +58,15 @@ class Order extends Model
             }
 
         }
+
+        Mail::create([
+            'to' => $order->email,
+            'subject' => 'Order',
+            'viewParams' => [
+                'url' => full_url("order/{$data['hash']}")
+            ],
+        ])->send();
+
         return $order;
     }
 

@@ -51,6 +51,9 @@ class Mail
     public static function create($data)
     {
         $obj = new static();
+
+        $obj->fill($data);
+
         if (!empty($obj->view)) {
             $obj->message = new View($obj->view, $obj->viewParams);
         }
@@ -62,8 +65,6 @@ class Mail
             $obj->headers['from'] = "From: {$obj->from}";
 
         }
-
-        $obj->fill($data);
 
         return $obj;
     }
