@@ -3,10 +3,11 @@ Basic MVC framework + basic store implementation conform test requirements.
 
 #Installation
 0) Standard actions related to any web project;
-1) Enter all needed data to - config/* (mostly database file);
-2) Go to schema folder;
-3) Run php run.php
-4) Profit
+1) Run composer install
+21) Enter all needed data to - config/* (mostly database file);
+3) Go to schema folder;
+4) Run php run.php
+5) Profit
 
 #Framework
 #####Was developed basic MVC framework.
